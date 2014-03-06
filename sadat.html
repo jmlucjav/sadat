@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="sadatc.css" />
+<title>Sadat</title>
+<script  type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="js/chance.min.js"></script>
+<script type="text/javascript" src="js/sadatj.js"></script>
+</head>
+
+<body>
+<div id="container">
+    <div id="header">
+        <h1>Sadat</h1>
+        <h2>Generate sample data for Solr</h2>
+    </div>   
+
+    <div id="menu">
+        <div>
+            <label>Schema:</label>
+            <input id="url" type="text" size=40 maxlength=40 value="http://localhost:8983/solr/collection1" />
+            <input id="buttonLoad" type="button" value="Get Fields" />
+            <span>&nbsp;&nbsp;</span>
+            <span class="schemaLoaded">
+                <label >Number of docs: </label>
+                <input id="numberdocs" type="number" value="1" />
+                <input id="buttonGen" type="button" value="Gen Docs" />
+            </span>
+            <br />
+            <span class="docsGenerated">
+            <label>Indexed docs:</label>
+            <label class="result"></label>
+            <span>&nbsp;&nbsp;</span>
+            <a href="http://localhost:8983/solr/collection1/query?q=*:*" class="result">Query Solr</a>
+            </span>
+        </div>
+    </div>
+
+    <div id="content" class="schemaLoaded" >
+        <div id="content_top"></div>
+        <div id="content_main">
+            <table id="fieldsTable" border="0">
+                <thead id="fieldsHead">
+                    <tr>
+                        <th>Field</th>
+                        <th>Schema Type</th> 
+                        <th>Generate type</th>
+                        <th>Min</th>
+                        <th>Max</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td></td>
+                </tr>
+                </tbody>
+
+            </table>
+        </div>
+        <div id="content_bottom"></div>
+
+        <div id="footer"><h3><a href="http://www.bryantsmith.com">florida web design</a></h3></div>
+    </div>
+</div>
+<script type="text/javascript">
+samod.init();
+//faster testing
+samod.fetchFields();
+</script>
+</body>
+</html>
