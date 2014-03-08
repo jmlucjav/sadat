@@ -25,6 +25,8 @@ var samoduser = function () {
     return {
         init: init,
         // export your methods start them with userGen...() 
-        userGenEnumeration: userGenEnumeration
+        userGenEnumeration: userGenEnumeration,
+        // list them in this array
+        userMethods:['userGenEnumeration']
     };
 }(); 

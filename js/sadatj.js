@@ -4,8 +4,16 @@ var samod = function () {
     var config = {
         URL:'http://localhost:8983/solr/collection1',
         fieldTypes  : new Array(),
-        IGNORE_NAMES: {},
-        IGNORE_TYPES: {}
+        IGNORE_NAMES: [ '_version_', '_root_' ],
+        //IGNORE_TYPES: {}
+        genOptions : {
+            Ignore: 'Ignore',
+            Text: 'Text',
+            Boolean: 'Boolean',
+            Date: 'Date',
+            Int: 'Int',
+            Float: 'Float'
+        }
     };    
 
     var init= function(config) {
@@ -28,6 +36,13 @@ var samod = function () {
 
     // private functions --------------------------------------------------------------------
     var fetchFieldTypes = function () {
+        //load userGen methods, would be better inside init(), but genOptions is undef
+        samoduser.init();
+        $.each(samoduser.userMethods, function(index, prop) {
+            console.log('samoduser: '+prop);
+            config.genOptions.prop = prop;
+        });
+
         $.ajax({
             type: "GET",
             url: config.URL +'/schema/fieldtypes',
@@ -99,8 +114,10 @@ var samod = function () {
             //console.log(af.name+ ' found '+ JSON.stringify(atype) + " .. "+atype.class);
             var cl = atype[0].class;
             var solrtype = cl.substring(cl.indexOf('.')+1);
-            var defgen = getDefaultGen(solrtype);
+            var defgen = getDefaultGen(solrtype, af.name);
             $('#fieldsTable > tbody:last').append(createField(af.name, solrtype, defgen));
+            //add options to select, we need to do it here cause until tr is added we cannot get by select#id
+            createSelect(af.name, defgen);
         } 
         onSchemaLoaded();        
     };
@@ -110,23 +127,28 @@ var samod = function () {
         onSchemaLoadedKO();        
     };
 
-    var getDefaultGen = function (type) {
+    var getDefaultGen = function (type, name) {
         var gentype = 'Ignore';
-        if (type=='int' || type=='long'|| type=='float'){
-            gentype = 'Numeric';
+        if (type=='TextField' || type=='StrField'){
+            gentype = 'Text';
+        } else if (type=='BoolField'){
+            gentype = 'Boolean';
+        }else if (type.indexOf('DateField', type.length - 'DateField'.length) !== -1){
+            gentype = 'Date';
+        }else if (type.indexOf('LongField', type.length - 'LongField'.length) !== -1 || type.indexOf('IntField', type.length - 'IntField'.length) !== -1){
+            gentype = 'Int';
+        }else if (type.indexOf('FloatField', type.length - 'FloatField'.length) !== -1){
+            gentype = 'Float';
+        }
+        //ignore by name
+        if ($.inArray(name, config.IGNORE_NAMES)>-1){
+            gentype = 'Ignore';
         }
         return gentype;
     }
 
     var createField = function (name, type, defgen) {
         //console.log('createField'+name+'-'+type);
-        if (name=='_version_' || name=='_root_'){
-            return null;
-        }
-        if (type=='location' || type=='date'|| type=='boolean'){
-            return null;
-        }
-
         var div = $('<tr></tr>', {
             class: 'fielddiv'
         });
@@ -138,8 +160,7 @@ var samod = function () {
             text: type,
             class: 'fieldtype'
         }).appendTo(div);
-        $('<td></td>', {
-            text: defgen,
+        var td = $('<td><select id="genselect-'+name+'"></select></td>', {
             class: 'fieldgentype'
         }).appendTo(div);
         if (type=='int' || type=='long'|| type=='float'){
@@ -153,10 +174,20 @@ var samod = function () {
             $('<input type="number" value="1000"></input>', {
                 class: 'fmax'
             }).appendTo(td);
-        }else if (type=='date'){
         }
         return div;
     };
+
+    var createSelect = function(fname, defgen){
+        $.each(config.genOptions, function(val, text) {
+            var sel = 'genselect-'+fname;
+            var option =  new Option(text,val); 
+            if (val==defgen){
+                option =  new Option(text,val,true,true);
+            }
+            $('#'+sel).append(option);
+        });
+    }
 
     var validateFields=function(){
         var err='a';
