@@ -6,14 +6,22 @@ var samod = function () {
         fieldTypes  : new Array(),
         IGNORE_NAMES: [ '_version_', '_root_' ],
         //IGNORE_TYPES: {}
-        genOptions : {
-            Ignore: 'Ignore',
-            Text: 'Text',
-            Boolean: 'Boolean',
-            Date: 'Date',
-            Int: 'Int',
-            Float: 'Float'
-        }
+        genOptions : [
+            ['Ignore'],
+            ['Text', 1, 5],
+            ['Boolean'],
+            ['Date'],
+            ['Int', 0, 1000],
+            ['Float', 0, 1000]
+        ]
+        //genOptions : {
+            //Ignore: ['Ignore'],
+            //Text: ['Text', 1, 5],
+            //Boolean: ['Boolean'],
+            //Date: ['Date'],
+            //Int: ['Int', 0, 1000],
+            //Float: ['Float', 0, 1000]
+        //}
     };    
 
     var init= function(config) {
@@ -40,7 +48,7 @@ var samod = function () {
         samoduser.init();
         $.each(samoduser.userMethods, function(index, prop) {
             console.log('samoduser: '+prop);
-            config.genOptions.prop = prop;
+            config.genOptions.push([prop]);
         });
 
         $.ajax({
@@ -163,27 +171,46 @@ var samod = function () {
         var td = $('<td><select id="genselect-'+name+'"></select></td>', {
             class: 'fieldgentype'
         }).appendTo(div);
-        if (type=='int' || type=='long'|| type=='float'){
-            var td = $('<td></td>', {
-            }).appendTo(div);
-            $('<input type="number" value="0"></input>', {
-                class: 'fmin'
-            }).appendTo(td);
-            td = $('<td></td>', {
-            }).appendTo(div);
-            $('<input type="number" value="1000"></input>', {
-                class: 'fmax'
-            }).appendTo(td);
+        //min/max
+        var td = $('<td></td>', {}).appendTo(div);
+        var m = createMin(type, defgen);
+        console.log('min '+ m);
+        if (m){
+            m.appendTo(td);
+        }
+        td = $('<td></td>', {}).appendTo(div);
+        m = createMax(type, defgen);
+        if (m){
+            m.appendTo(td);
         }
         return div;
     };
 
+    var createMax = function(type, defgen){
+        return createNumericInput(defgen, 'fmax', 2);
+    }
+    var createMin = function(type, defgen){
+        return createNumericInput(defgen, 'fmin', 1);
+    }
+    var createNumericInput = function(defgen, tclass, valindex){
+        var optiontype = $.grep(config.genOptions, function(obj, index){ return obj[0] == defgen });
+        //console.log('min '+ optiontype);
+        var value = optiontype[0][valindex];
+        if (value == undefined){
+            return null;
+        }
+        return $('<input type="number" value="'+value+'"></input>', {
+            class: tclass
+        });
+    }
+
     var createSelect = function(fname, defgen){
-        $.each(config.genOptions, function(val, text) {
+        $.each(config.genOptions, function(index, array) {
+            var text = array[0];
             var sel = 'genselect-'+fname;
-            var option =  new Option(text,val); 
-            if (val==defgen){
-                option =  new Option(text,val,true,true);
+            var option =  new Option(text,text); 
+            if (text==defgen){
+                option =  new Option(text,text,true,true);
             }
             $('#'+sel).append(option);
         });
@@ -298,6 +325,7 @@ var samod = function () {
         return ret;
     };
     return {
+        config: config,
         // set up which functions should be public        
         init: init,
         fetchFields: fetchFields,
