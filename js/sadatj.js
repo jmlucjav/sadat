@@ -158,7 +158,8 @@ var samod = function () {
     var createField = function (name, type, defgen) {
         //console.log('createField'+name+'-'+type);
         var div = $('<tr></tr>', {
-            class: 'fielddiv'
+            class: 'fielddiv',
+            id: 'tr-'+name
         });
         $('<td></td>', {
             text: name,
@@ -168,28 +169,45 @@ var samod = function () {
             text: type,
             class: 'fieldtype'
         }).appendTo(div);
-        var td = $('<td><select id="genselect-'+name+'"></select></td>', {
+        var td = $('<td></td>', {
             class: 'fieldgentype'
         }).appendTo(div);
+        var select = $('<select id="genselect-'+name+'"></select>', {
+        }).appendTo(td);
         //min/max
-        var td = $('<td></td>', {}).appendTo(div);
-        var m = createMin(type, defgen);
-        console.log('min '+ m);
-        if (m){
-            m.appendTo(td);
-        }
-        td = $('<td></td>', {}).appendTo(div);
-        m = createMax(type, defgen);
-        if (m){
-            m.appendTo(td);
-        }
+        setRightMinMax(div, defgen, 'tr-'+name);
+        select.change( function () {
+                var option = select.val();
+                setRightMinMax(div, option, 'tr-'+name);
+            }
+        );
         return div;
     };
 
-    var createMax = function(type, defgen){
+    var setRightMinMax = function(div, defgen,trid){
+        //remove old ones
+        $('#'+trid+' td.minmax').remove();
+        //add new ones
+        var tdmin = $('<td></td>', {
+            class: 'minmax'
+        }).appendTo(div);
+        var m = createMin(defgen);
+        console.log('min '+ m);
+        if (m){
+            m.appendTo(tdmin);
+        }
+        var tdmax = $('<td></td>', {
+            class: 'minmax'
+        }).appendTo(div);
+        m = createMax(defgen);
+        if (m){
+            m.appendTo(tdmax);
+        }
+    }
+    var createMax = function(defgen){
         return createNumericInput(defgen, 'fmax', 2);
     }
-    var createMin = function(type, defgen){
+    var createMin = function(defgen){
         return createNumericInput(defgen, 'fmin', 1);
     }
     var createNumericInput = function(defgen, tclass, valindex){
