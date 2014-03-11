@@ -15,12 +15,12 @@ var samod = function () {
             ['Float', 0, 1000]
         ]
         //genOptions : {
-            //Ignore: ['Ignore'],
-            //Text: ['Text', 1, 5],
-            //Boolean: ['Boolean'],
-            //Date: ['Date'],
-            //Int: ['Int', 0, 1000],
-            //Float: ['Float', 0, 1000]
+        //Ignore: ['Ignore'],
+        //Text: ['Text', 1, 5],
+        //Boolean: ['Boolean'],
+        //Date: ['Date'],
+        //Int: ['Int', 0, 1000],
+        //Float: ['Float', 0, 1000]
         //}
     };    
 
@@ -47,7 +47,7 @@ var samod = function () {
         //load userGen methods, would be better inside init(), but genOptions is undef
         samoduser.init();
         $.each(samoduser.userMethods, function(index, prop) {
-            console.log('samoduser: '+prop);
+            //console.log('samoduser: '+prop);
             config.genOptions.push([prop]);
         });
 
@@ -67,7 +67,7 @@ var samod = function () {
             var af = data.fieldTypes[f];
             var pair = {name:af.name, class:af.class};
             config.fieldTypes.push(pair);
-            console.log(pair);
+            //console.log(pair);
         } 
     }
 
@@ -80,14 +80,14 @@ var samod = function () {
         //store types first
         fetchFieldTypes();        
         if (typeof config.fieldTypes !== 'undefined' && config.fieldTypes.length > 0){
-        $.ajax({
-            type: "GET",
-            url: config.URL +'/schema/fields',
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: OnGetSchemaSuccess,
-            error: OnGetSchemaError
-        });
+            $.ajax({
+                type: "GET",
+                url: config.URL +'/schema/fields',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: OnGetSchemaSuccess,
+                error: OnGetSchemaError
+            });
         }
     };
 
@@ -177,11 +177,11 @@ var samod = function () {
         //min/max
         setRightMinMax(div, defgen, 'tr-'+name);
         select.change( function () {
-                var option = select.val();
-                setRightMinMax(div, option, 'tr-'+name);
-            }
-        );
-        return div;
+            var option = select.val();
+            setRightMinMax(div, option, 'tr-'+name);
+        }
+                     );
+                     return div;
     };
 
     var setRightMinMax = function(div, defgen,trid){
@@ -192,7 +192,7 @@ var samod = function () {
             class: 'minmax'
         }).appendTo(div);
         var m = createMin(defgen);
-        console.log('min '+ m);
+        //console.log('min '+ m);
         if (m){
             m.appendTo(tdmin);
         }
@@ -212,12 +212,14 @@ var samod = function () {
     }
     var createNumericInput = function(defgen, tclass, valindex){
         var optiontype = $.grep(config.genOptions, function(obj, index){ return obj[0] == defgen });
-        //console.log('min '+ optiontype);
+        //console.log(defgen+' '+tclass+' '+valindex);
         var value = optiontype[0][valindex];
         if (value == undefined){
             return null;
         }
-        return $('<input type="number" value="'+value+'"></input>', {
+        return $('<input></input>', {
+            type: 'number',
+            value: value,
             class: tclass
         });
     }
@@ -234,8 +236,39 @@ var samod = function () {
         });
     }
 
+    var validateField=function(name, fieldgentype, min, max){
+        //console.log('validate '+name+' '+min+' '+max);
+        var vmin, vmax;
+        if(min==undefined) return;
+        if (fieldgentype=='Float'){
+            vmin = parseFloat(min);
+            vmax = parseFloat(max);
+        } else{
+            vmin = parseInt(min);
+            vmax = parseInt(max);
+        }
+        var err;
+        if (vmin>=vmax){
+            err=name+': min must be < max';
+        }
+        //console.log('val ret '+err+' '+vmin+' '+vmax);
+        return err;
+    }
     var validateFields=function(){
-        var err='a';
+        var err='';
+        //just check min/max
+        $("tbody tr").each(function() {
+            $this = $(this)
+            var name = $this.find("td.field").html();
+            var gentype = $this.find("td.fieldgentype").html();
+            var min = $this.find("input.fmin").val();
+            var max = $this.find("input.fmax").val();
+            //console.log(name+' '+min+' '+max);
+            var ferr = validateField(name, gentype, min, max);            
+            if (ferr){
+                err += '\n'+ferr;
+            }
+        });
         return err;
     }
     var genDocs= function(e) {
@@ -299,13 +332,22 @@ var samod = function () {
     };
     var   genOneDoc= function(i) {
         var d = {};
-        $('.fielddiv').each(function(index){
+        //gen user defined ones last
+        var fieldlist = $('.fielddiv').sort(function(atr,btr){
+            var a = $(this).find('.fieldtype').text();
+            var a = $(this).find('.fieldtype').text();
+            if (a.indexOf('user') == 0 && b.indexOf('user') == 0) return 0;
+            if (a.indexOf('user') == 0) return -1;
+            if (b.indexOf('user') == 0) return 1;
+            return 0;
+        });
+        $.each(fieldlist, function(index){
             var ftype = $(this).find('.fieldtype').text();
             var fname  = $(this).find('.field').text();
             var gentype   = $(this).find('.fieldgentype').text();
             var genmin = $(this).find('.fmin').val();
             var genmax = $(this).find('.fmax').val();
-            //console.log(fname+'-'+ftype+'-'+gentype+'-'+genmin+'-'+genmax);
+            console.log(fname+'-'+ftype+'-'+gentype+'-'+genmin+'-'+genmax);
             d[fname] = genOneField(fname, ftype, gentype,genmin,genmax);
         })
         //console.log('doc '+i+' '+JSON.stringify(d, undefined, 2));
