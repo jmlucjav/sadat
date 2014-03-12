@@ -334,27 +334,29 @@ var samod = function () {
         var d = {};
         //gen user defined ones last
         var fieldlist = $('.fielddiv').sort(function(atr,btr){
-            var a = $(this).find('.fieldtype').text();
-            var a = $(this).find('.fieldtype').text();
+            var a = $(atr).find('.fieldgentype select').val();
+            var b = $(btr).find('.fieldgentype select').val();
+            //console.log('comp '+a+' '+b);
             if (a.indexOf('user') == 0 && b.indexOf('user') == 0) return 0;
-            if (a.indexOf('user') == 0) return -1;
-            if (b.indexOf('user') == 0) return 1;
+            if (a.indexOf('user') == 0) return 1;
+            if (b.indexOf('user') == 0) return -1;
             return 0;
         });
-        $.each(fieldlist, function(index){
-            var ftype = $(this).find('.fieldtype').text();
-            var fname  = $(this).find('.field').text();
-            var gentype   = $(this).find('.fieldgentype').text();
-            var genmin = $(this).find('.fmin').val();
-            var genmax = $(this).find('.fmax').val();
-            console.log(fname+'-'+ftype+'-'+gentype+'-'+genmin+'-'+genmax);
-            d[fname] = genOneField(fname, ftype, gentype,genmin,genmax);
+        $.each(fieldlist, function(index, value){
+            var ftype = $(value).find('.fieldtype').text();
+            var fname  = $(value).find('.field').text();
+            var gentype   = $(value).find('.fieldgentype select').val();
+            var genmin = $(value).find('.fmin').val();
+            var genmax = $(value).find('.fmax').val();
+            //console.log(fname+'-'+ftype+'-'+gentype+'-'+genmin+'-'+genmax);
+            d[fname] = genOneField(d, fname, ftype, gentype,genmin,genmax);
         })
         //console.log('doc '+i+' '+JSON.stringify(d, undefined, 2));
         return d;
     };
 
-    var genOneField= function(fname, ftype, gentype, min, max) {
+    var genOneField= function(doc, fname, ftype, gentype, min, max) {
+        console.log(doc);
         var ret;
         switch (gentype) {
             case 'Numeric':
