@@ -9,10 +9,10 @@ var samoduser = function () {
     };
 
     // user defined generators-------------------------------------------------------------------
-    var userGenEnumeration= function (doc) {
+    var userGenEnum= function (doc) {
         var res = "UNKOWN";
         //sample generator, depends on the id field
-        if (doc.id!=undefined){
+        if (!isNaN(doc.id)){
             if (doc.id % 2 == 0){
                 res = 'EVEN';
             } else {
@@ -24,9 +24,9 @@ var samoduser = function () {
 
     return {
         init: init,
-        // export your methods start them with userGen...() 
-        userGenEnumeration: userGenEnumeration,
+        // export your methods start them with 'user'...() 
+        userGenEnum: userGenEnum,
         // list them in this array
-        userMethods:['userGenEnumeration']
+        userMethods:['userGenEnum']
     };
 }(); 

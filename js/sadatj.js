@@ -10,7 +10,7 @@ var samod = function () {
             ['Ignore'],
             ['Text', 1, 5],
             ['Boolean'],
-            ['Date'],
+            ['Date', '2014-00-01', '2015-00-01'],
             ['Int', 0, 1000],
             ['Float', 0, 1000]
         ]
@@ -217,8 +217,12 @@ var samod = function () {
         if (value == undefined){
             return null;
         }
+        var inputtype = 'number';
+        if (defgen=='Date'){
+            inputtype = 'date';
+        }
         return $('<input></input>', {
-            type: 'number',
+            type: inputtype,
             value: value,
             class: tclass
         });
@@ -356,41 +360,53 @@ var samod = function () {
     };
 
     var genOneField= function(doc, fname, ftype, gentype, min, max) {
-        console.log(doc);
+        //console.log(doc);
         var ret;
-        switch (gentype) {
-            case 'Numeric':
-                ret = getRandomNumeric(ftype, min, max) 
-            break;
-            default:
-                ret = getRandomText(ftype, gentype);
+        if (gentype.indexOf('user')==0){
+            ret = samoduser[gentype](doc, fname, ftype, gentype, min, max) ;
+        }else{
+            var funcname = 'genType'+gentype;
+            ret = samod[funcname](doc, fname, ftype, gentype, min, max);
         }
         return ret;
     };
-    var  getRandomText= function(ftype, gentype) {
-        var ret = chance.sentence({words: 5});
+
+    var  genTypeIgnore= function(doc, fname, ftype, gentype, min, max){
+        return ;
+    };
+    var  genTypeText= function(doc, fname, ftype, gentype, min, max){
+        var n = chance.integer({min: min, max: max});
+        var ret = chance.sentence({words: n});
         return ret;
     };
-    var  getRandomNumeric= function(ftype, smin, smax) {
-        var ret;
-        var min = parseFloat(smin);
-        var max = parseFloat(smax);
-        switch (ftype) {
-            case "float":
-                var random = (Math.random() * (max - min) + min).toFixed(4);
-            ret = random;
-            break;
-            default:
-                var random = Math.floor(Math.random() * (max - min + 1)) + min;
-            ret = random;
-        }
+    var  genTypeInt= function(doc, fname, ftype, gentype, min, max){
+        var ret = chance.integer({min: min, max: max});
         return ret;
     };
+    var  genTypeFloat= function(doc, fname, ftype, gentype, min, max){
+        var ret = chance.floating({min: min, max: max});
+        return ret;
+    };
+    var  genTypeDate= function(doc, fname, ftype, gentype, min, max){
+        var ret = chance.date({min: min, max: max});
+        return ret;
+    };
+    var  genTypeBoolean= function(doc, fname, ftype, gentype, min, max){
+        var ret = chance.bool();
+        return ret;
+    };
+
     return {
         config: config,
         // set up which functions should be public        
         init: init,
         fetchFields: fetchFields,
-        genDocs: genDocs
+        genDocs: genDocs,
+        genTypeText: genTypeText,
+        genTypeIgnore: genTypeIgnore,
+        genTypeInt: genTypeInt,
+        genTypeFloat: genTypeFloat,
+        genTypeDate: genTypeDate,
+        genTypeBoolean: genTypeBoolean
     };
 }(); 
