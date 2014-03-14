@@ -10,7 +10,7 @@ var samod = function () {
             ['Ignore'],
             ['Text', 1, 5],
             ['Boolean'],
-            ['Date', '2014-00-01', '2015-00-01'],
+            ['Date', '2010-01-01', '2015-01-01'],
             ['Int', 0, 1000],
             ['Float', 0, 1000]
         ]
@@ -247,12 +247,15 @@ var samod = function () {
         if (fieldgentype=='Float'){
             vmin = parseFloat(min);
             vmax = parseFloat(max);
+        }else if (fieldgentype=='Date'){
+            vmin = new Date(Date.parse(min));
+            vmax = new Date(Date.parse(max));
         } else{
             vmin = parseInt(min);
             vmax = parseInt(max);
         }
         var err;
-        if (vmin>=vmax){
+        if (vmin>vmax){
             err=name+': min must be < max';
         }
         //console.log('val ret '+err+' '+vmin+' '+vmax);
@@ -388,7 +391,11 @@ var samod = function () {
         return ret;
     };
     var  genTypeDate= function(doc, fname, ftype, gentype, min, max){
-        var ret = chance.date({min: min, max: max});
+        console.log('gen date:' + min+' '+max);
+        //chance does not allow min/max for date, so first get year and month, then use them to gen a random date with those set
+        var year = chance.year({min: new Date(Date.parse(min)).getFullYear(), max: new Date(Date.parse(max)).getFullYear()});
+        //var month = chance.year({min: min.getFullYear(), max: max.getFullYear()});
+        var ret = chance.date({year:year});
         return ret;
     };
     var  genTypeBoolean= function(doc, fname, ftype, gentype, min, max){
