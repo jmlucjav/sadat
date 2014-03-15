@@ -290,9 +290,9 @@ var samod = function () {
         for (var i=0; i<numdocs;i++){
             var doc =   genOneDoc(i);
             numdocsOk += indexDoc(doc);
-            if (numdocs%10 == 0){
-                commitSolr();
-            }
+            //if (i%10 == 0){
+                //commitSolr();
+            //}
         }
         commitSolr();
         console.log('indexed '+numdocsOk+' out of '+ numdocs);
@@ -320,6 +320,7 @@ var samod = function () {
     };
 
     var commitSolr= function(){
+        console.log("commiting...");
         $.ajax({
             type: "POST",
             url: config.URL +'/update?commit=true',
@@ -391,7 +392,7 @@ var samod = function () {
         return ret;
     };
     var  genTypeDate= function(doc, fname, ftype, gentype, min, max){
-        console.log('gen date:' + min+' '+max);
+        //console.log('gen date:' + min+' '+max);
         //chance does not allow min/max for date, so first get year and month, then use them to gen a random date with those set
         var year = chance.year({min: new Date(Date.parse(min)).getFullYear(), max: new Date(Date.parse(max)).getFullYear()});
         //var month = chance.year({min: min.getFullYear(), max: max.getFullYear()});
