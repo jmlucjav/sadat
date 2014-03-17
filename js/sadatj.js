@@ -291,7 +291,7 @@ var samod = function () {
             var doc =   genOneDoc(i);
             numdocsOk += indexDoc(doc);
             //if (i%10 == 0){
-                //commitSolr();
+            //commitSolr();
             //}
         }
         commitSolr();
