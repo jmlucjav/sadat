@@ -3,7 +3,7 @@ sadat
 
 This is a small utility to generate documents to index into Solr. It is handy when you have a schem.xml (or are working on one) but you have no documents to index. By using Sadat, you can create some documents to validate the schema/solrconfig you are building is working as expected.
 
-I needed something to work on while trying to learn js, and I came up with this. Expect WTFs.
+I needed something to practice on while trying to learn js, and I came up with this. Expect WTFs.
 
 Features
 ------------
